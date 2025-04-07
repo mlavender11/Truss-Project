@@ -1,6 +1,6 @@
 clear
 clc
-load("inputs.mat")
+load("practiceProblem.mat")
 
 Sc = [Sx; Sy];
 
@@ -15,7 +15,6 @@ A = zeros(2*J, M);
 
 % Loops over the joints
 for j = 1:J
-    fprintf('Joint: %d\n', j)
 
     % Sets up the row vector to be applied to row k of A
     xforces = zeros(1, M);
@@ -23,11 +22,9 @@ for j = 1:J
 
     % Finds the members connected to this joint
     members = find(C(j,:));
-    disp(members)
 
     % Loops for each member connected to this joint
     for m = members
-        disp(m)
 
         % Finding what other joint this member is connected to
         joints = find(C(:,m));
@@ -63,10 +60,53 @@ T = A\L;
 member_forces = T(1:M);
 reactions = T(M+1:end);
 
+
+% Maximal load of each member
+max_loads = zeros(1, M);
+
+% Find weight load
+Wj = find(L);
+W = L(Wj);
+
+
+for m = 1:M
+
+    % If member is in tension or a ZFM, max load is infinite
+    if member_forces(m) >= 0
+        Wf = inf;
+    else
+        % Calculates R value for each member
+        R = member_forces(m)/W;
+    
+        % Find length of member
+        joints = find(C(:,m));
+        L_m = sqrt((X(joints(2))-X(joints(1)))^2 + (Y(joints(2))-Y(joints(1)))^2);
+    
+        % Find P-crit for member
+        P = 2390.012*((L_m)^-1.811);
+    
+        % Calculate max load for each member
+        Wf = -P/R;
+    end
+    
+    max_loads(m) = Wf;
+
+end
+
+
+% Since members have 'infinite' tensile strength, we want to find the
+% members that would buckle first. Since in the above equation, we
+% calculated max weight as -P/R, the minimum value of max_loads will 
+% show the weight at which the first member will buckle 
+
+max_load = min(max_loads);
+
 % Display results
 fprintf('\nMember forces:\n');
 for m = 1:M
-    if member_forces(m) >= 0
+    if member_forces(m) == 0
+        fprintf('m%d: %d oz (ZFM)\n', abs(m), member_forces(m));
+    elseif member_forces(m) > 0
         fprintf('m%d: %.2f oz (T)\n', m, member_forces(m));
     else
         fprintf('m%d: %.2f oz (C)\n', m, -member_forces(m));
@@ -87,3 +127,5 @@ for m = 1:M
 end
 cost = 10*J + 1*total_length;
 fprintf('\nTruss cost: $%.2f\n', cost);
+fprintf('\nMaximal Load: %.2foz\n', max_load)
+fprintf('\nload/cost ratio in oz/$ = %.2f\n', max_load/cost)

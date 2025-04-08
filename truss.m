@@ -106,12 +106,14 @@ fail_member = find(max_loads == max_load);
 fprintf('\nMember forces:\n');
 for m = 1:M
     if member_forces(m) == 0
-        fprintf('m%d: %d oz (ZFM)\n', abs(m), member_forces(m));
+        fprintf('m%d: %d oz (ZFM)', abs(m), member_forces(m));
     elseif member_forces(m) > 0
-        fprintf('m%d: %.2f oz (T)\n', m, member_forces(m));
+        fprintf('m%d: %.2f oz (T)', m, member_forces(m));
     else
-        fprintf('m%d: %.2f oz (C)\n', m, -member_forces(m));
+        fprintf('m%d: %.2f oz (C)', m, -member_forces(m));
     end
+
+    fprintf(' – Breaking Load: %.2f oz\n', max_loads(m))
 end
 
 fprintf('\nReaction forces:\n');

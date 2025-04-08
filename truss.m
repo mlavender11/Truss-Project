@@ -100,23 +100,24 @@ end
 % show the weight at which the first member will buckle 
 
 max_load = min(max_loads);
+fail_member = find(max_loads == max_load);
 
 % Display results
 fprintf('\nMember forces:\n');
 for m = 1:M
     if member_forces(m) == 0
-        fprintf('m%d: %d oz (ZFM)\n', abs(m), member_forces(m));
+        fprintf('m%d: %d N (ZFM)\n', abs(m), member_forces(m));
     elseif member_forces(m) > 0
-        fprintf('m%d: %.2f oz (T)\n', m, member_forces(m));
+        fprintf('m%d: %.2f N (T)\n', m, member_forces(m));
     else
-        fprintf('m%d: %.2f oz (C)\n', m, -member_forces(m));
+        fprintf('m%d: %.2f N (C)\n', m, -member_forces(m));
     end
 end
 
 fprintf('\nReaction forces:\n');
-fprintf('Sx1: %.2f oz\n', reactions(1));
-fprintf('Sy1: %.2f oz\n', reactions(2));
-fprintf('Sy2: %.2f oz\n', reactions(3));
+fprintf('Sx1: %.2f N\n', reactions(1));
+fprintf('Sy1: %.2f N\n', reactions(2));
+fprintf('Sy2: %.2f N\n', reactions(3));
 
 % Cost
 total_length = 0;
@@ -126,6 +127,7 @@ for m = 1:M
     total_length = total_length + L_m;
 end
 cost = 10*J + 1*total_length;
-fprintf('\nTruss cost: $%.2f\n', cost);
-fprintf('\nMaximal Load: %.2foz\n', max_load)
-fprintf('\nload/cost ratio in oz/$ = %.2f\n', max_load/cost)
+fprintf('\nTruss Cost: $%.2f\n', cost);
+fprintf('\nMaximal Load: %.2fN\n', max_load)
+fprintf('First Member to Buckle: Member %d\n', fail_member)
+fprintf('\nLoad:Cost Ratio in N/$ = %.2f\n', max_load/cost)

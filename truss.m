@@ -61,8 +61,11 @@ member_forces = T(1:M);
 reactions = T(M+1:end);
 
 
-% Maximal load of each member
+% Maximal live load allowed by each member
 max_loads = zeros(1, M);
+
+% Maximum compression in each member
+max_forces = zeros(1, M);
 
 % Find weight load
 Wj = find(L);
@@ -74,6 +77,7 @@ for m = 1:M
     % If member is in tension or a ZFM, max load is infinite
     if member_forces(m) >= 0
         Wf = inf;
+        max_forces(m) = inf;
     else
         % Calculates R value for each member
         R = member_forces(m)/W;
@@ -84,6 +88,8 @@ for m = 1:M
     
         % Find P-crit for member
         P = 2390.012*((L_m)^-1.811);
+
+        max_forces(m) = P;
     
         % Calculate max load for each member
         Wf = -P/R;
@@ -113,7 +119,8 @@ for m = 1:M
         fprintf('m%d: %.2f oz (C)', m, -member_forces(m));
     end
 
-    fprintf(' – Breaking Load: %.2f oz\n', max_loads(m))
+    fprintf(' – Breaking Load: %.2f oz', max_loads(m))
+    fprintf(' – Force in Member at Max Load %.2f oz\n', max_forces(m))
 end
 
 fprintf('\nReaction forces:\n');
